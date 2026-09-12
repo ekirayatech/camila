@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HQ Ciberseguridad — Agente Camila Blanco</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-color: #f4f7f6;
+      --card-bg: #ffffff;
+      --primary: #4a90e2;
+      --secondary: #9c27b0;
+      --success: #2eb82e;
+      --danger: #e74c3c;
+      --gold: #d97706;
+      --text-color: #2c3e50;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Lexend', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0; padding: 15px;
+      display: flex; justify-content: center;
+    }
+
+    .app-container {
+      width: 100%; max-width: 800px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border: 3px solid #e0e6ed;
+    }
+
+    /* Encabezado con Logo */
+    header {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 2px dashed #e0e6ed;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+    }
+
+    .school-logo {
+      max-width: 180px;
+      height: auto;
+      margin-bottom: 12px;
+      background: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+
+    .badge-tag {
+      background: rgba(255, 255, 255, 0.15);
+      color: #38bdf8;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .agent-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin: 5px 0;
+      color: #ffffff;
+    }
+
+    .agent-name {
+      color: #facc15;
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+      font-size: 28px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    p { font-size: 15px; line-height: 1.5; }
+
+    /* Tabs de Sesiones */
+    .tabs {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding: 5px 0 15px 0; margin-bottom: 15px;
+    }
+    .tab-btn {
+      flex: 1; min-width: 90px; padding: 10px;
+      border: 2px solid var(--primary); background: #eaf2fc;
+      border-radius: 12px; font-weight: bold; cursor: pointer;
+      color: var(--primary); font-size: 13px; text-align: center;
+    }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    .session-content { display: none; }
+    .session-content.active { display: block; }
+
+    .card-box {
+      background: #f8fafc; border: 2px solid #cbd5e1;
+      border-radius: 15px; padding: 15px; margin-bottom: 15px;
+    }
+    
+    .link-btn {
+      display: inline-block; background: var(--secondary); color: white;
+      text-decoration: none; padding: 10px 18px; border-radius: 10px;
+      font-weight: bold; margin: 8px 0; font-size: 14px;
+    }
+
+    /* Interacciones */
+    .drag-zone {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;
+      min-height: 60px; padding: 10px; background: #e2e8f0; border-radius: 10px;
+    }
+    .drag-item {
+      background: white; border: 2px solid #64748b; padding: 8px 12px;
+      border-radius: 8px; font-weight: bold; cursor: grab; user-select: none;
+    }
+    .drop-targets { display: flex; gap: 10px; }
+    .target-box {
+      flex: 1; min-height: 90px; border: 2px dashed #94a3b8;
+      border-radius: 10px; padding: 8px; background: white; text-align: center;
+    }
+
+    .match-grid { display: flex; gap: 15px; }
+    .match-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .match-btn {
+      padding: 10px; border: 2px solid var(--primary); background: white;
+      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px;
+    }
+    .match-btn.selected { background: #dbeafe; }
+    .match-btn.matched { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+    .fill-box { font-size: 17px; line-height: 2; }
+    .fill-input {
+      border: 2px solid var(--primary); border-radius: 6px; padding: 4px 8px;
+      font-family: inherit; font-size: 15px; width: 110px; text-align: center;
+    }
+
+    .word-search { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 300px; margin: 10px auto; }
+    .letter-btn {
+      padding: 12px; font-size: 16px; font-weight: bold; background: white;
+      border: 2px solid var(--primary); border-radius: 8px; cursor: pointer;
+    }
+    .letter-btn.found { background: #dcfce7; border-color: var(--success); color: #15803d; }
+
+    .quiz-opt {
+      display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0;
+      background: white; border: 2px solid #cbd5e1; border-radius: 10px;
+      font-weight: bold; cursor: pointer; font-size: 14px;
+    }
+    .quiz-opt.correct { background: #dcfce7; border-color: var(--success); }
+
+    /* Botones Finales */
+    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
+    .action-btn {
+      flex: 1; min-width: 220px; padding: 15px; border-radius: 12px;
+      font-size: 16px; font-weight: bold; border: none; cursor: pointer;
+      color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+    .btn-pdf { background: var(--success); }
+    .btn-cert { background: var(--gold); }
+
+    .feedback-msg { margin-top: 10px; font-weight: bold; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <img src="https://colegioekiraya.edu.co/wp-content/uploads/2024/09/LOGO-CEM-COLOR-02.png" alt="Logo Colegio Ekiraya" class="school-logo" id="logoImg" crossorigin="anonymous">
+    <br>
+    <span class="badge-tag">🛡️ Centro de Control de Ciberseguridad</span>
+    <div class="agent-title">
+      AGENTE ESPECIAL
+      <span class="agent-name">⭐ CAMILA BLANCO ⭐</span>
+    </div>
+    <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 13px;">Misión de Entrenamiento de 5 Sesiones</p>
+  </header>
+
+  <!-- Pestañas de Sesiones -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('s1', this)">Clase 1</button>
+    <button class="tab-btn" onclick="switchTab('s2', this)">Clase 2</button>
+    <button class="tab-btn" onclick="switchTab('s3', this)">Clase 3</button>
+    <button class="tab-btn" onclick="switchTab('s4', this)">Clase 4</button>
+    <button class="tab-btn" onclick="switchTab('s5', this)">Clase 5</button>
+  </div>
+
+  <!-- CLASE 1 -->
+  <div id="s1" class="session-content active">
+    <div class="card-box">
+      <h3>1. Video Guía: Engaños en Internet</h3>
+      <p>Mira este video corto sobre Phishing, Smishing y Vishing:</p>
+      <a href="https://www.youtube.com/shorts/sFpWZluQAwA" target="_blank" class="link-btn">🎬 Ver Video Short</a>
+    </div>
+
+    <div class="card-box">
+      <h3>2. Reto: Clasifica los Mensajes</h3>
+      <p>Arrastra cada tarjeta a su caja correcta:</p>
+      
+      <div class="drag-zone" id="dragSource">
+        <div class="drag-item" draggable="true" id="d1" data-type="bad">🚨 ¡Ganaste un premio! Clic aquí</div>
+        <div class="drag-item" draggable="true" id="d2" data-type="good">🔒 Clave con números y letras</div>
+        <div class="drag-item" draggable="true" id="d3" data-type="bad">📞 Llamada pidiendo contraseñas</div>
+      </div>
+
+      <div class="drop-targets">
+        <div class="target-box" ondragover="allowDrop(event)" ondrop="drop(event, 'bad')">
+          <b style="color:var(--danger)">🚫 Trampa / Riesgo</b>
+        </div>
+        <div class="target-box" ondragover="allowDrop(event)" ondrop="drop(event, 'good')">
+          <b style="color:var(--success)">🟢 Seguro</b>
+        </div>
+      </div>
+      <div id="fdb1" class="feedback-msg"></div>
+    </div>
+  </div>
+
+  <!-- CLASE 2 -->
+  <div id="s2" class="session-content">
+    <div class="card-box">
+      <h3>1. Portal de Apoyo: Contraseñas</h3>
+      <p>Revisa la teoría de seguridad en este portal:</p>
+      <a href="https://estebanbolp-rgb.github.io/ciberseguridad/" target="_blank" class="link-btn">🌐 Portal Ciberseguridad</a>
+    </div>
+
+    <div class="card-box">
+      <h3>2. Reto: Completa el Texto</h3>
+      <p class="fill-box">
+        Una contraseña segura debe ser 
+        <input type="text" class="fill-input" id="fill1" placeholder="¿larga?" oninput="checkFill()">
+        y combinar letras con 
+        <input type="text" class="fill-input" id="fill2" placeholder="¿números?" oninput="checkFill()">.
+      </p>
+      <div id="fdb2" class="feedback-msg"></div>
+    </div>
+  </div>
+
+  <!-- CLASE 3 -->
+  <div id="s3" class="session-content">
+    <div class="card-box">
+      <h3>1. Portal de Apoyo: Huella Digital</h3>
+      <p>Explora este recurso para conocer qué rastros dejas en la red:</p>
+      <a href="https://ekirayatech.github.io/ciber7/" target="_blank" class="link-btn">🌐 Portal Ciber7</a>
+    </div>
+
+    <div class="card-box">
+      <h3>2. Reto: Encuentra la Palabra Secreta</h3>
+      <p>Haz clic en las letras para formar la palabra de protección: <b>P - R - I - V - A - C - I - D - A - D</b></p>
+      
+      <div class="word-search">
+        <button class="letter-btn" onclick="markLetter(this, 'P')">P</button>
+        <button class="letter-btn" onclick="markLetter(this, 'R')">R</button>
+        <button class="letter-btn" onclick="markLetter(this, 'I')">I</button>
+        <button class="letter-btn" onclick="markLetter(this, 'V')">V</button>
+        <button class="letter-btn" onclick="markLetter(this, 'A')">A</button>
+      </div>
+      <div id="fdb3" class="feedback-msg"></div>
+    </div>
+  </div>
+
+  <!-- CLASE 4 -->
+  <div id="s4" class="session-content">
+    <div class="card-box">
+      <h3>1. Reto: Empareja la Solución Antibullying</h3>
+      <p>Relaciona cada situación con su respuesta correcta:</p>
+
+      <div class="match-grid">
+        <div class="match-col" id="colL">
+          <button class="match-btn" data-id="1" onclick="selL(this)">📍 Foto con ubicación</button>
+          <button class="match-btn" data-id="2" onclick="selL(this)">🗣️ Te molestan en red</button>
+        </div>
+        <div class="match-col" id="colR">
+          <button class="match-btn" data-id="2" onclick="selR(this)">🛑 Avisar a un adulto</button>
+          <button class="match-btn" data-id="1" onclick="selR(this)">🔒 Ajustar a Privado</button>
+        </div>
+      </div>
+      <div id="fdb4" class="feedback-msg"></div>
+    </div>
+  </div>
+
+  <!-- CLASE 5 -->
+  <div id="s5" class="session-content">
+    <div class="card-box">
+      <h3>1. Trivia Final de Agente</h3>
+      <p>¿Qué debes hacer si recibes un correo de alguien desconocido pidiendo tus datos?</p>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">Responder de inmediato con mis claves</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, true)">No hacer clic y avisar a un adulto</button>
+      <button class="quiz-opt" onclick="checkQuiz(this, false)">Compartir el mensaje con amigos</button>
+      <div id="fdb5" class="feedback-msg"></div>
+    </div>
+
+    <div class="card-box" style="text-align: center;">
+      <h3>🏆 Documentos de Finalización</h3>
+      <p>¡Felicitaciones Camila! Puedes generar tus credenciales oficiales de superación:</p>
+      
+      <div class="btn-group">
+        <button class="action-btn btn-pdf" onclick="generarPDF()">📄 Descargar Reporte PDF</button>
+        <button class="action-btn btn-cert" onclick="generarCertificado()">🎓 Descargar Certificado</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. PROGRAMACIÓN DE FECHAS PARA CADA CLASE (Formato: YYYY-MM-DD)
+  const fechasClases = {
+    s1: '2026-09-17', // Clase 1: Disponible de inmediato
+    s2: '2026-09-25', // Clase 2: Se desbloquea el 15 de Septiembre
+    s3: '2026-10-05', // Clase 3: Se desbloquea el 18 de Septiembre
+    s4: '2026-09-13', // Clase 4: Se desbloquea el 22 de Septiembre
+    s5: '2026-09-21'  // Clase 5: Se desbloquea el 25 de Septiembre
+  };
+
+  let scoreData = { dragOk: 0, fillOk: 0, wordOk: 0, matchOk: 0, quizOk: 0 };
+  let logoBase64 = null;
+
+  // Precargar Logo
+  function preloadLogo() {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      logoBase64 = canvas.toDataURL("image/png");
+    };
+    img.src = "https://colegioekiraya.edu.co/wp-content/uploads/2024/09/LOGO-CEM-COLOR-02.png";
+  }
+
+  // 2. CONTROL DE ACCESO POR FECHA
+  function validarAccesoFechas() {
+    // Obtener la fecha actual del sistema en formato YYYY-MM-DD
+    const hoy = new Date().toISOString().split('T')[0];
+
+    Object.keys(fechasClases).forEach((tabId, index) => {
+      const fechaClase = fechasClases[tabId];
+      // Buscar el botón correspondiente por índice
+      const btn = document.querySelectorAll('.tab-btn')[index];
+
+      if (hoy < fechaClase) {
+        // La clase aún no está disponible
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+        btn.innerHTML = `🔒 Clase ${index + 1}`;
+        btn.title = `Disponible a partir del ${fechaClase}`;
+      } else {
+        // La clase ya está disponible
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        btn.innerHTML = `Clase ${index + 1}`;
+      }
+    });
+  }
+
+  // Cambiar de pestaña con validación de seguridad
+  function switchTab(tabId, btn) {
+    const hoy = new Date().toISOString().split('T')[0];
+    if (hoy < fechasClases[tabId]) {
+      alert(`🔒 Esta sesión estará disponible a partir del: ${fechasClases[tabId]}`);
+      return;
+    }
+
+    document.querySelectorAll('.session-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // Inicializar al cargar la página
+  window.onload = function() {
+    preloadLogo();
+    validarAccesoFechas();
+  };
+
+  /* =========================================================
+     RESTO DE FUNCIONALIDADES (Interacciones, PDF y Certificado)
+     ========================================================= */
+
+  // Drag and Drop
+  let dragged = null;
+  document.querySelectorAll('.drag-item').forEach(i => {
+    i.addEventListener('dragstart', e => dragged = e.target);
+  });
+  function allowDrop(e) { e.preventDefault(); }
+  function drop(e, targetType) {
+    e.preventDefault();
+    if (!dragged) return;
+    e.target.closest('.target-box').appendChild(dragged);
+
+    let items = document.querySelectorAll('.target-box .drag-item');
+    let correct = 0;
+    items.forEach(it => {
+      let parent = it.parentElement;
+      if (parent.innerHTML.includes('Riesgo') && it.dataset.type === 'bad') correct++;
+      if (parent.innerHTML.includes('Seguro') && it.dataset.type === 'good') correct++;
+    });
+
+    scoreData.dragOk = correct;
+    document.getElementById('fdb1').style.color = '#2eb82e';
+    document.getElementById('fdb1').innerText = `Completado: ${correct} de 3 respuestas correctas.`;
+  }
+
+  // Fill
+  function checkFill() {
+    let v1 = document.getElementById('fill1').value.toLowerCase().trim();
+    let v2 = document.getElementById('fill2').value.toLowerCase().trim();
+    let ok = 0;
+    if (v1 === 'larga' || v1 === 'fuerte') ok++;
+    if (v2 === 'numeros' || v2 === 'números') ok++;
+
+    scoreData.fillOk = ok;
+    let fdb = document.getElementById('fdb2');
+    if (ok === 2) {
+      fdb.style.color = '#2eb82e';
+      fdb.innerText = '🌟 ¡Excelente Camila! Palabras correctas.';
+    }
+  }
+
+  // Sopa de letras
+  let lettersFound = 0;
+  function markLetter(btn, char) {
+    if (!btn.classList.contains('found')) {
+      btn.classList.add('found');
+      lettersFound++;
+      if (lettersFound === 5) {
+        scoreData.wordOk = 1;
+        document.getElementById('fdb3').style.color = '#2eb82e';
+        document.getElementById('fdb3').innerText = '🌟 ¡Encontraste las claves de la Privacidad!';
+      }
+    }
+  }
+
+  // Match
+  let selectedL = null;
+  function selL(btn) {
+    if (btn.classList.contains('matched')) return;
+    document.querySelectorAll('#colL .match-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedL = btn;
+  }
+  function selR(btn) {
+    if (!selectedL || btn.classList.contains('matched')) return;
+    if (selectedL.dataset.id === btn.dataset.id) {
+      selectedL.classList.remove('selected');
+      selectedL.classList.add('matched');
+      btn.classList.add('matched');
+      selectedL = null;
+      scoreData.matchOk++;
+      
+      if (scoreData.matchOk === 2) {
+        document.getElementById('fdb4').style.color = '#2eb82e';
+        document.getElementById('fdb4').innerText = '🎉 ¡Excelente Camila! Parejas correctas.';
+      }
+    }
+  }
+
+  // Quiz
+  function checkQuiz(btn, isCorrect) {
+    let fdb = document.getElementById('fdb5');
+    if (isCorrect) {
+      btn.classList.add('correct');
+      scoreData.quizOk = 1;
+      fdb.style.color = '#2eb82e';
+      fdb.innerText = '🎉 ¡Correcto! Esa es la respuesta más segura.';
+    } else {
+      fdb.style.color = '#e74c3c';
+      fdb.innerText = 'Intenta de nuevo... ¿Cuál es la opción más segura?';
+    }
+  }
+
+  // Generar PDF
+  function generarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxTextWidth = pageWidth - (margin * 2);
+
+    doc.setDrawColor(74, 144, 226);
+    doc.setLineWidth(1);
+    doc.rect(10, 10, pageWidth - 20, doc.internal.pageSize.getHeight() - 20);
+
+    if (logoBase64) {
+      doc.addImage(logoBase64, 'PNG', margin, 15, 45, 18);
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(30, 41, 59);
+    doc.text("INFORME DE DESEMPENO EN CIBERSEGURIDAD", pageWidth - margin, 22, { align: "right" });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 116, 139);
+    doc.text("Ruta Formativa Interactivas (5 Sesiones)", pageWidth - margin, 28, { align: "right" });
+
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.8);
+    doc.line(margin, 38, pageWidth - margin, 38);
+
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(margin, 42, maxTextWidth, 26, 3, 3, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(74, 144, 226);
+    doc.text("ESTUDIANTE: CAMILA BLANCO", margin + 5, 51);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85);
+    doc.text("Grado: 7° | Trimestre: 1 | Proyecto: Campana Escolar de Ciberseguridad", margin + 5, 60);
+
+    let currentY = 78;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    doc.text("Resultados por Sesion de Entrenamiento:", margin, currentY);
+
+    currentY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    const resultados = [
+      `• Clase 1 (Clasificacion de Mensajes/Riesgos): ${scoreData.dragOk}/3 Desafios Completados`,
+      `• Clase 2 (Conceptos de Contrasenas Seguras): ${scoreData.fillOk}/2 Palabras Clave`,
+      `• Clase 3 (Sopa de Letras - Privacidad Digital): ${scoreData.wordOk}/1 Objetivo Alcanzado`,
+      `• Clase 4 (Protocolos de Prevencion Antibullying): ${scoreData.matchOk}/2 Soluciones Vinculadas`,
+      `• Clase 5 (Quiz de Comprobacion Final): ${scoreData.quizOk}/1 Respuesta Correcta`
+    ];
+
+    resultados.forEach(item => {
+      const lines = doc.splitTextToSize(item, maxTextWidth);
+      doc.text(lines, margin + 3, currentY);
+      currentY += (lines.length * 6) + 2;
+    });
+
+    currentY += 5;
+    doc.setFillColor(240, 253, 244);
+    doc.setDrawColor(187, 247, 208);
+    doc.roundedRect(margin, currentY, maxTextWidth, 38, 3, 3, "FD");
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(21, 128, 61);
+    doc.text("Observaciones Pedagogicas y Progresos:", margin + 5, currentY + 8);
+
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(22, 101, 52);
+    
+    const obsText = "La estudiante Camila Blanco demostro un excelente compromiso en las 5 sesiones de la ruta formativa. Identifica con precision amenazas comunes en la red como el phishing y aplica los protocolos adecuados de privacidad y seguridad digital.";
+    const obsLines = doc.splitTextToSize(obsText, maxTextWidth - 10);
+    doc.text(obsLines, margin + 5, currentY + 16);
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Documento Oficial de Evaluacion Formativa — Proyecto Ciberseguridad 7°", pageWidth / 2, pageHeight - 15, { align: "center" });
+
+    doc.save("Reporte_Ciberseguridad_CamilaBlanco.pdf");
+  }
+
+  // Generar Certificado
+  function generarCertificado() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+    
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    doc.setFillColor(254, 252, 232);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+    doc.setDrawColor(217, 119, 6);
+    doc.setLineWidth(2);
+    doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(0.8);
+    doc.rect(12, 12, pageWidth - 24, pageHeight - 24);
+
+    if (logoBase64) {
+      doc.addImage(logoBase64, 'PNG', (pageWidth / 2) - 25, 18, 50, 20);
+    }
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(26);
+    doc.setTextColor(30, 41, 59);
+    doc.text("CERTIFICADO DE EXCELENCIA", pageWidth / 2, 50, { align: "center" });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(217, 119, 6);
+    doc.text("OTORGADO CON DISTINCION A:", pageWidth / 2, 60, { align: "center" });
+
+    doc.setFont("times", "bolditalic");
+    doc.setFontSize(32);
+    doc.setTextColor(15, 23, 42);
+    doc.text("CAMILA BLANCO", pageWidth / 2, 78, { align: "center" });
+
+    doc.setDrawColor(217, 119, 6);
+    doc.setLineWidth(1);
+    doc.line((pageWidth / 2) - 60, 82, (pageWidth / 2) + 60, 82);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(51, 65, 85);
+
+    const descCert = "Por haber completado satisfactoriamente el programa de capacitacion en Ciberseguridad Escolar, demostrando conocimientos avanzados en proteccion de datos, contrasenas seguras, navegacion responsable y prevencion de riesgos en el entorno digital.";
+    const linesCert = doc.splitTextToSize(descCert, 210);
+    doc.text(linesCert, pageWidth / 2, 95, { align: "center", lineHeightFactor: 1.4 });
+
+    doc.setFillColor(254, 243, 199);
+    doc.setDrawColor(217, 119, 6);
+    doc.setLineWidth(1.5);
+    doc.circle(pageWidth / 2, 142, 15, "FD");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(180, 83, 9);
+    doc.text("AGENTE", pageWidth / 2, 140, { align: "center" });
+    doc.text("OFICIAL", pageWidth / 2, 145, { align: "center" });
+
+    const signatureY = 175;
+    
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.5);
+    doc.line(45, signatureY, 115, signatureY);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text("Coordinacion de Ciberseguridad", 80, signatureY + 6, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text("Colegio Ekiraya", 80, signatureY + 11, { align: "center" });
+
+    doc.line(182, signatureY, 252, signatureY);
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text("Direccion Academica", 217, signatureY + 6, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text("Programa de Tecnologia", 217, signatureY + 11, { align: "center" });
+
+    doc.save("Certificado_Ciberseguridad_CamilaBlanco.pdf");
+  }
+</script>
+</body>
+</html>
